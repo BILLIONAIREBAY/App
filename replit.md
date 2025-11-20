@@ -40,6 +40,13 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **charity_auctions**: Split payment tracking for impact auctions
 
 ## Recent Changes
+- 2025-11-20: **TACHE 1 COMPLETED** - Local-First Architecture & Biometric Authentication
+  - WatermelonDB configured with JSI for high-performance SQLite
+  - Schema mirrors Supabase (users, items, charities)
+  - SyncEngine with PULL/PUSH to Cloudflare Workers backend
+  - Biometric auth (Passkeys/Face ID) via expo-local-authentication
+  - Home screen uses withObservables for reactive UI
+  - Timestamps persisted for delta tracking
 - 2025-11-20: Completed TACHE 0 - LUMINESCENCE V3 initialization
 - 2025-11-20: Added membership_tier enum to users table
 - 2025-11-20: Created charities and charity_auctions tables
@@ -61,6 +68,10 @@ You will need to configure the following secrets:
 1. Install dependencies: `npm install`
 2. Start Expo dev server: `npm run app:dev`
 3. Scan QR code with Expo Go app on your physical device
+
+**IMPORTANT**: WatermelonDB requires a custom development build due to JSI (JavaScript Interface). Expo Go does NOT support WatermelonDB. To test:
+- Use `eas build --profile development` to create a custom build
+- Or test on iOS Simulator / Android Emulator with development builds
 
 ### Deploying Backend
 1. Configure Wrangler: `cd backend && wrangler login`
