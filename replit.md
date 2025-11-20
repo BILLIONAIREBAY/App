@@ -25,11 +25,27 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **Concierge Vision**: AI-powered luxury authentication via camera
 - **Real-time Auctions**: WebSocket-based via Durable Objects
 - **Shadow Vault**: Encrypted R2 storage for authentication certificates
+- **Membership Tiers**: Discovery (free), Elite ($7k/year), Infinite ($40k/year)
+- **Impact & Legacy**: Charity auction support with split payments
+
+### Smart Contracts (Base Sepolia Testnet)
+- **Fx721L**: Living Asset NFT with dynamic metadata and stolen flag
+- **MockUSDFx**: ERC20 stablecoin for testing (6 decimals, faucet enabled)
+- **MockJusticeProtocol**: Freeze/seize protocol for compliance
+
+### Database Schema (Supabase PostgreSQL)
+- **users**: Identity core with wallet, trust_score, membership_tier
+- **items**: Luxury catalog with JSONB metadata, status tracking
+- **charities**: Verified foundation registry with wallet addresses
+- **charity_auctions**: Split payment tracking for impact auctions
 
 ## Recent Changes
+- 2025-11-20: Completed TACHE 0 - LUMINESCENCE V3 initialization
+- 2025-11-20: Added membership_tier enum to users table
+- 2025-11-20: Created charities and charity_auctions tables
+- 2025-11-20: Deployed MockUSDFx and MockJusticeProtocol contracts
 - 2025-01-20: Initial monorepo setup with all workspaces
 - 2025-01-20: Configured Base Sepolia blockchain integration
-- 2025-01-20: Created Supabase schema for users and living assets
 
 ## Development Setup
 
