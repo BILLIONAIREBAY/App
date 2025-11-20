@@ -23,7 +23,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd app && npx expo start --tunnel"
+args = "cd app && npx expo start --tunnel --clear"
 
 [[ports]]
 localPort = 8081
