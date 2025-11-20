@@ -1,0 +1,23 @@
+{
+  "name": "billionairebay-luminescence",
+  "version": "3.0.0",
+  "private": true,
+  "workspaces": [
+    "app",
+    "backend",
+    "chain",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "chain:compile": "cd chain && npx hardhat compile",
+    "db:push": "cd backend && supabase db push",
+    "app:dev": "cd app && npm run start"
+  },
+  "devDependencies": {
+    "turbo": "latest",
+    "typescript": "^5.3.3",
+    "prettier": "^3.2.5"
+  }
+}
