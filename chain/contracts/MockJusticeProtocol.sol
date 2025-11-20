@@ -44,7 +44,6 @@ contract MockJusticeProtocol is AccessControl {
         public 
         onlyRole(ENFORCER_ROLE) 
     {
-        bytes32 key = keccak256(abi.encodePacked(tokenContract, tokenId));
         frozenTokens[tokenContract][tokenId] = true;
         emit TokenFrozen(tokenContract, tokenId, reason);
     }
