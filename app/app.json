@@ -18,7 +18,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.bbay.luminescence",
       "infoPlist": {
-        "NSCameraUsageDescription": "BillionaireBay needs camera access for Concierge Vision (luxury item authentication)"
+        "NSCameraUsageDescription": "BillionaireBay needs camera access for Concierge Vision (luxury item authentication)",
+        "NSFaceIDUsageDescription": "BillionaireBay uses Face ID to securely authenticate and protect your luxury assets"
       }
     },
     "android": {
@@ -43,6 +44,18 @@
         "expo-camera",
         {
           "cameraPermission": "Allow BillionaireBay to access your camera for item authentication."
+        }
+      ],
+      "@morrowdigital/watermelondb-expo-plugin",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.6.10",
+            "packagingOptions": {
+              "pickFirst": ["**/libc++_shared.so"]
+            }
+          }
         }
       ]
     ],
