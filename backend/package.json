@@ -1,0 +1,22 @@
+{
+  "name": "@bbay/backend",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@trpc/server": "^11.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0",
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "typescript": "^5.3.3",
+    "dotenv": "^16.4.0"
+  },
+  "private": true
+}
