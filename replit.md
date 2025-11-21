@@ -32,14 +32,42 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **Fx721L**: Living Asset NFT with dynamic metadata and stolen flag
 - **MockUSDFx**: ERC20 stablecoin for testing (6 decimals, faucet enabled)
 - **MockJusticeProtocol**: Freeze/seize protocol for compliance
+- **FxCharitySplitter**: Atomic split payment contract (seller + charity)
+- **AuraRegistry**: Global stolen item tracking registry
 
 ### Database Schema (Supabase PostgreSQL)
 - **users**: Identity core with wallet, trust_score, membership_tier
 - **items**: Luxury catalog with JSONB metadata, status tracking
 - **charities**: Verified foundation registry with wallet addresses
 - **charity_auctions**: Split payment tracking for impact auctions
+- **whisper_requests**: AI-powered text search queries with structured extraction
+- **auctions**: Live auction metadata with start/end times
+- **bids**: Bid history with user, amount, timestamps
+- **app_config**: Gatekeeper version control and maintenance mode
 
 ## Recent Changes
+- 2025-11-21: **TACHE 4 COMPLETED** - LE GÉNIE & L'HÉRITAGE (AI Search + Charity Impact)
+  - **Smart Contracts:**
+    * FxCharitySplitter.sol: Atomic payment splitting between seller and charity using transfer() calls
+    * Updated deploy_core.ts to deploy FxCharitySplitter alongside other contracts
+  - **Database:**
+    * whisper_requests table: AI-powered search with UUID primary key, user_id FK, text_query, ai_analysis_json (JSONB), status enum
+    * Automatic triggers for created_at/updated_at timestamps
+    * RLS policies for user isolation + service_role full access
+  - **Backend (Cloudflare Workers):**
+    * POST /whisper/request: UUID validation, AI analysis stub (keyword-based tag extraction + category inference), UPSERT with explicit updated_at
+    * Integrated whisper_requests into sync/pull (query, fetch, response) and sync/push (create/update/delete with timestamp stripping)
+  - **Frontend:**
+    * WatermelonDB UUID v4 generation via expo-crypto setGenerator()
+    * WhisperRequest model with observable reactivity
+    * SyncEngine whisper_requests integration (pull/push with delta sync)
+    * app/whisper/create.tsx: AI-powered search UI (local-first create → backend analysis → local update)
+    * app/impact/index.tsx: Charity registry read-only view with verified badges
+  - **AI Analysis Stub:**
+    * Keyword-based tag extraction (Rolex, Bordeaux, Ferrari, etc.)
+    * Category inference (Timepieces, Wine & Spirits, Automobiles, Art, Jewelry)
+    * Year detection via regex (19xx/20xx)
+    * 85% confidence placeholder for future ML integration
 - 2025-11-21: **TACHE 3 COMPLETED** - L'ARÈNE DES ENCHÈRES (Durable Objects & WebSockets)
   - **Backend (Cloudflare Workers + Durable Objects):**
     * AuctionRoomDO class: In-RAM auction state (currentPrice, highestBidder, endTime, bidsHistory)
