@@ -5,17 +5,13 @@ compatibility_date = "2024-01-01"
 [vars]
 ENVIRONMENT = "development"
 
-[[r2_buckets]]
-binding = "SHADOW_VAULT"
-bucket_name = "bbay-shadow-vault-encrypted"
-
 [[durable_objects.bindings]]
 name = "AUCTION_ROOM"
 class_name = "AuctionRoomDO"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["AuctionRoomDO"]
+new_sqlite_classes = ["AuctionRoomDO"]
 
 [build]
 command = "npm run build"
