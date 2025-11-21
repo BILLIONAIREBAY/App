@@ -9,7 +9,7 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import { Video } from 'expo-av';
+import { Video, ResizeMode } from 'expo-av';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -109,7 +109,7 @@ function HomeScreen({ items }: { items: Item[] }) {
           uri: 'https://assets.mixkit.co/videos/preview/mixkit-black-and-white-city-traffic-1217-large.mp4',
         }}
         style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        resizeMode={ResizeMode.Cover}
         isLooping
         shouldPlay
         isMuted={true}

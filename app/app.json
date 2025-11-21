@@ -52,10 +52,13 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "1.6.10",
+            "kotlinVersion": "1.9.24",
             "packagingOptions": {
               "pickFirst": [
-                "**/libc++_shared.so"
+                "lib/x86/libc++_shared.so",
+                "lib/x86_64/libc++_shared.so",
+                "lib/armeabi-v7a/libc++_shared.so",
+                "lib/arm64-v8a/libc++_shared.so"
               ]
             }
           }
