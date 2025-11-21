@@ -2,6 +2,7 @@ import { database } from '../db';
 import User from '../db/models/User';
 import Item from '../db/models/Item';
 import Charity from '../db/models/Charity';
+import WhisperRequest from '../db/models/WhisperRequest';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8787';
 
@@ -9,10 +10,12 @@ interface SyncPullResponse {
   users: any[];
   items: any[];
   charities: any[];
+  whisper_requests: any[];
   deleted: {
     users: string[];
     items: string[];
     charities: string[];
+    whisper_requests: string[];
   };
   lastSyncTimestamp: string;
 }
@@ -22,16 +25,19 @@ interface SyncPushPayload {
     users?: any[];
     items?: any[];
     charities?: any[];
+    whisper_requests?: any[];
   };
   updated: {
     users?: any[];
     items?: any[];
     charities?: any[];
+    whisper_requests?: any[];
   };
   deleted: {
     users?: string[];
     items?: string[];
     charities?: string[];
+    whisper_requests?: string[];
   };
 }
 
@@ -71,6 +77,7 @@ export class SyncEngine {
       const usersCollection = database.get<User>('users');
       const itemsCollection = database.get<Item>('items');
       const charitiesCollection = database.get<Charity>('charities');
+      const whisperRequestsCollection = database.get<WhisperRequest>('whisper_requests');
 
       await database.write(async () => {
         for (const userData of data.users || []) {
@@ -163,6 +170,30 @@ export class SyncEngine {
           }
         }
 
+        for (const whisperData of data.whisper_requests || []) {
+          try {
+            const existingWhisper = await whisperRequestsCollection.find(whisperData.id);
+            await existingWhisper.update((whisper) => {
+              whisper.userId = whisperData.user_id;
+              whisper.textQuery = whisperData.text_query;
+              whisper.aiAnalysisJson = whisperData.ai_analysis_json || '';
+              whisper.status = whisperData.status;
+              (whisper as any)._raw.created_at = new Date(whisperData.created_at).getTime();
+              (whisper as any)._raw.updated_at = new Date(whisperData.updated_at).getTime();
+            });
+          } catch {
+            await whisperRequestsCollection.create((whisper) => {
+              (whisper as any)._raw.id = whisperData.id;
+              whisper.userId = whisperData.user_id;
+              whisper.textQuery = whisperData.text_query;
+              whisper.aiAnalysisJson = whisperData.ai_analysis_json || '';
+              whisper.status = whisperData.status;
+              (whisper as any)._raw.created_at = new Date(whisperData.created_at).getTime();
+              (whisper as any)._raw.updated_at = new Date(whisperData.updated_at).getTime();
+            });
+          }
+        }
+
         if (data.deleted) {
         for (const userId of data.deleted.users || []) {
           try {
@@ -188,6 +219,15 @@ export class SyncEngine {
             await charity.destroyPermanently();
           } catch {
             console.log('[SyncEngine] Charity already deleted:', charityId);
+          }
+        }
+
+        for (const whisperId of data.deleted.whisper_requests || []) {
+          try {
+            const whisper = await whisperRequestsCollection.find(whisperId);
+            await whisper.destroyPermanently();
+          } catch {
+            console.log('[SyncEngine] Whisper request already deleted:', whisperId);
           }
         }
         }

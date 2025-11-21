@@ -5,6 +5,7 @@ import { schema } from './schema';
 import User from './models/User';
 import Item from './models/Item';
 import Charity from './models/Charity';
+import WhisperRequest from './models/WhisperRequest';
 
 const adapter = new SQLiteAdapter({
   schema,
@@ -14,5 +15,5 @@ const adapter = new SQLiteAdapter({
 
 export const database = new Database({
   adapter,
-  modelClasses: [User, Item, Charity],
+  modelClasses: [User, Item, Charity, WhisperRequest],
 });

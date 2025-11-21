@@ -23,16 +23,19 @@ const SyncPushSchema = z.object({
     users: z.array(z.any()).optional(),
     items: z.array(z.any()).optional(),
     charities: z.array(z.any()).optional(),
+    whisper_requests: z.array(z.any()).optional(),
   }).optional(),
   updated: z.object({
     users: z.array(z.any()).optional(),
     items: z.array(z.any()).optional(),
     charities: z.array(z.any()).optional(),
+    whisper_requests: z.array(z.any()).optional(),
   }).optional(),
   deleted: z.object({
     users: z.array(z.string()).optional(),
     items: z.array(z.string()).optional(),
     charities: z.array(z.string()).optional(),
+    whisper_requests: z.array(z.string()).optional(),
   }).optional(),
 });
 
@@ -82,16 +85,19 @@ app.post('/sync/push', async (c) => {
         users: payload.created?.users?.length || 0,
         items: payload.created?.items?.length || 0,
         charities: payload.created?.charities?.length || 0,
+        whisper_requests: payload.created?.whisper_requests?.length || 0,
       },
       updated: {
         users: payload.updated?.users?.length || 0,
         items: payload.updated?.items?.length || 0,
         charities: payload.updated?.charities?.length || 0,
+        whisper_requests: payload.updated?.whisper_requests?.length || 0,
       },
       deleted: {
         users: payload.deleted?.users?.length || 0,
         items: payload.deleted?.items?.length || 0,
         charities: payload.deleted?.charities?.length || 0,
+        whisper_requests: payload.deleted?.whisper_requests?.length || 0,
       },
     });
 
@@ -160,6 +166,15 @@ app.post('/sync/push', async (c) => {
           return c.json({ error: 'Database insert failed', table: 'charities', details: error.message }, 500);
         }
       }
+
+      for (const whisperRequest of payload.created.whisper_requests || []) {
+        const { created_at, updated_at, ...cleanWhisper } = whisperRequest;
+        const { error } = await supabase.from('whisper_requests').insert(cleanWhisper);
+        if (error) {
+          console.error('[SYNC/PUSH] Whisper request insert failed:', error);
+          return c.json({ error: 'Database insert failed', table: 'whisper_requests', details: error.message }, 500);
+        }
+      }
     }
 
     if (payload.updated) {
@@ -189,6 +204,15 @@ app.post('/sync/push', async (c) => {
           return c.json({ error: 'Database update failed', table: 'charities', details: error.message }, 500);
         }
       }
+
+      for (const whisperRequest of payload.updated.whisper_requests || []) {
+        const { id, created_at, updated_at, ...data } = whisperRequest;
+        const { error } = await supabase.from('whisper_requests').update(data).eq('id', id);
+        if (error) {
+          console.error('[SYNC/PUSH] Whisper request update failed:', error);
+          return c.json({ error: 'Database update failed', table: 'whisper_requests', details: error.message }, 500);
+        }
+      }
     }
 
     if (payload.deleted) {
@@ -213,6 +237,14 @@ app.post('/sync/push', async (c) => {
         if (error) {
           console.error('[SYNC/PUSH] Charity delete failed:', error);
           return c.json({ error: 'Database delete failed', table: 'charities', details: error.message }, 500);
+        }
+      }
+
+      for (const whisperId of payload.deleted.whisper_requests || []) {
+        const { error } = await supabase.from('whisper_requests').delete().eq('id', whisperId);
+        if (error) {
+          console.error('[SYNC/PUSH] Whisper request delete failed:', error);
+          return c.json({ error: 'Database delete failed', table: 'whisper_requests', details: error.message }, 500);
         }
       }
     }
@@ -247,12 +279,14 @@ app.get('/sync/pull', async (c) => {
     let usersQuery = supabase.from('users').select('*');
     let itemsQuery = supabase.from('items').select('*');
     let charitiesQuery = supabase.from('charities').select('*');
+    let whisperRequestsQuery = supabase.from('whisper_requests').select('*');
 
     if (lastPulledAt) {
       const timestamp = new Date(lastPulledAt).toISOString();
       usersQuery = usersQuery.gt('updated_at', timestamp);
       itemsQuery = itemsQuery.gt('updated_at', timestamp);
       charitiesQuery = charitiesQuery.gt('updated_at', timestamp);
+      whisperRequestsQuery = whisperRequestsQuery.gt('updated_at', timestamp);
     }
 
     let deletionsQuery = supabase.from('deletions').select('*');
@@ -261,10 +295,11 @@ app.get('/sync/pull', async (c) => {
       deletionsQuery = deletionsQuery.gt('deleted_at', timestamp);
     }
 
-    const [usersResult, itemsResult, charitiesResult, deletionsResult] = await Promise.all([
+    const [usersResult, itemsResult, charitiesResult, whisperRequestsResult, deletionsResult] = await Promise.all([
       usersQuery,
       itemsQuery,
       charitiesQuery,
+      whisperRequestsQuery,
       deletionsQuery,
     ]);
 
@@ -283,6 +318,11 @@ app.get('/sync/pull', async (c) => {
       return c.json({ error: 'Failed to fetch charities', details: charitiesResult.error.message }, 500);
     }
 
+    if (whisperRequestsResult.error) {
+      console.error('[SYNC/PULL] Whisper requests fetch failed:', whisperRequestsResult.error);
+      return c.json({ error: 'Failed to fetch whisper requests', details: whisperRequestsResult.error.message }, 500);
+    }
+
     if (deletionsResult.error) {
       console.error('[SYNC/PULL] Deletions fetch failed:', deletionsResult.error);
       return c.json({ error: 'Failed to fetch deletions', details: deletionsResult.error.message }, 500);
@@ -291,6 +331,7 @@ app.get('/sync/pull', async (c) => {
     const users = usersResult.data || [];
     const items = itemsResult.data || [];
     const charities = charitiesResult.data || [];
+    const whisperRequests = whisperRequestsResult.data || [];
     const deletions = deletionsResult.data || [];
 
     const deletedByTable = deletions.reduce(
@@ -299,13 +340,14 @@ app.get('/sync/pull', async (c) => {
         acc[del.table_name].push(del.record_id);
         return acc;
       },
-      { users: [], items: [], charities: [] }
+      { users: [], items: [], charities: [], whisper_requests: [] }
     );
 
     const allTimestamps = [
       ...users.map((u: any) => new Date(u.updated_at).getTime()),
       ...items.map((i: any) => new Date(i.updated_at).getTime()),
       ...charities.map((c: any) => new Date(c.updated_at).getTime()),
+      ...whisperRequests.map((w: any) => new Date(w.updated_at).getTime()),
       ...deletions.map((d: any) => new Date(d.deleted_at).getTime()),
     ].filter((t) => !isNaN(t));
 
@@ -318,6 +360,7 @@ app.get('/sync/pull', async (c) => {
       users,
       items,
       charities,
+      whisper_requests: whisperRequests,
       deleted: deletedByTable,
       lastSyncTimestamp: maxTimestamp,
     };
@@ -326,10 +369,12 @@ app.get('/sync/pull', async (c) => {
       users: response.users.length,
       items: response.items.length,
       charities: response.charities.length,
+      whisper_requests: response.whisper_requests.length,
       deleted: {
         users: deletedByTable.users.length,
         items: deletedByTable.items.length,
         charities: deletedByTable.charities.length,
+        whisper_requests: deletedByTable.whisper_requests.length,
       },
       watermark: maxTimestamp,
     });
@@ -408,6 +453,94 @@ app.get('/auction/:id/websocket', async (c) => {
     );
   }
 });
+
+app.post('/whisper/request', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { text_query, user_id } = body;
+
+    if (!text_query || typeof text_query !== 'string') {
+      return c.json({ error: 'Missing or invalid text_query' }, 400);
+    }
+
+    console.log('[WHISPER] Processing query:', text_query);
+
+    const aiAnalysis = {
+      tags: extractTags(text_query),
+      category: inferCategory(text_query),
+      confidence: 0.85,
+      status: 'completed',
+    };
+
+    console.log('[WHISPER] AI analysis:', aiAnalysis);
+
+    return c.json({
+      text_query,
+      ai_analysis: aiAnalysis,
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[WHISPER] Error:', error);
+    return c.json(
+      {
+        error: 'WHISPER_REQUEST_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
+  }
+});
+
+function extractTags(query: string): string[] {
+  const lowercaseQuery = query.toLowerCase();
+  const tags: string[] = [];
+
+  const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+  if (yearMatch) tags.push(yearMatch[0]);
+
+  const keywords = [
+    'rolex', 'omega', 'patek', 'watch',
+    'wine', 'bordeaux', 'champagne', 'vintage',
+    'hermes', 'louis vuitton', 'gucci', 'chanel', 'bag',
+    'ferrari', 'porsche', 'lamborghini', 'car',
+    'art', 'painting', 'sculpture',
+    'diamond', 'jewelry', 'gold', 'platinum'
+  ];
+
+  keywords.forEach((keyword) => {
+    if (lowercaseQuery.includes(keyword)) {
+      tags.push(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+    }
+  });
+
+  return [...new Set(tags)];
+}
+
+function inferCategory(query: string): string {
+  const lowercaseQuery = query.toLowerCase();
+
+  if (lowercaseQuery.includes('wine') || lowercaseQuery.includes('champagne') || lowercaseQuery.includes('bordeaux')) {
+    return 'Wine & Spirits';
+  }
+  if (lowercaseQuery.includes('watch') || lowercaseQuery.includes('rolex') || lowercaseQuery.includes('omega')) {
+    return 'Timepieces';
+  }
+  if (lowercaseQuery.includes('bag') || lowercaseQuery.includes('hermes') || lowercaseQuery.includes('louis vuitton')) {
+    return 'Handbags';
+  }
+  if (lowercaseQuery.includes('car') || lowercaseQuery.includes('ferrari') || lowercaseQuery.includes('porsche')) {
+    return 'Automobiles';
+  }
+  if (lowercaseQuery.includes('art') || lowercaseQuery.includes('painting') || lowercaseQuery.includes('sculpture')) {
+    return 'Art';
+  }
+  if (lowercaseQuery.includes('jewelry') || lowercaseQuery.includes('diamond') || lowercaseQuery.includes('gold')) {
+    return 'Jewelry';
+  }
+
+  return 'Luxury Goods';
+}
 
 export default app;
 

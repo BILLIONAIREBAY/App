@@ -45,5 +45,16 @@ export const schema = appSchema({
         { name: 'updated_at', type: 'number' },
       ]
     }),
+    tableSchema({
+      name: 'whisper_requests',
+      columns: [
+        { name: 'user_id', type: 'string' },
+        { name: 'text_query', type: 'string' },
+        { name: 'ai_analysis_json', type: 'string', isOptional: true },
+        { name: 'status', type: 'string' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
   ]
 });
