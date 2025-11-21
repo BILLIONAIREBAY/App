@@ -60,17 +60,51 @@ https://bbay-backend-worker.ceo-dc1.workers.dev
 
 ⚠️ **WatermelonDB requires a custom development build** due to JSI (JavaScript Interface). Expo Go does NOT fully support WatermelonDB.
 
-**For production testing:**
+**For custom development builds:**
+
+1. **Authenticate with Expo** (first time only):
+   ```bash
+   cd app
+   npx eas login
+   ```
+   This will open a browser for you to log in with your Expo account.
+   
+   **Don't have an Expo account?** Create one at https://expo.dev/signup
+
+2. **Build development version:**
+   ```bash
+   npx eas build --profile development --platform android
+   # OR for iOS:
+   npx eas build --profile development --platform ios
+   ```
+   
+   ⏱️ **Build time:** 15-30 minutes (cloud build on Expo servers)
+   
+3. **Download and install** the `.apk` (Android) or `.ipa` (iOS) file on your device
+
+**Alternative: Use EXPO_TOKEN for CI/CD**
 ```bash
-cd app
-eas build --profile development --platform ios
-# OR
-eas build --profile development --platform android
+export EXPO_TOKEN=your_token_here
+npx eas build --profile development --platform android --non-interactive
 ```
 
 ---
 
 ## 🏗️ **PRODUCTION BUILD PROCEDURE**
+
+### Step 0: Authenticate with Expo
+
+**First-time setup:**
+```bash
+cd app
+npx eas login
+```
+
+**For CI/CD pipelines:**
+```bash
+export EXPO_TOKEN=your_personal_access_token
+```
+Learn more: https://docs.expo.dev/accounts/programmatic-access/
 
 ### Step 1: Configure EAS Build
 
