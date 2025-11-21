@@ -71,22 +71,33 @@ https://bbay-backend-worker.ceo-dc1.workers.dev
    
    **Don't have an Expo account?** Create one at https://expo.dev/signup
 
-2. **Build development version:**
+2. **Build development version (FIRST TIME - Interactive):**
    ```bash
+   # First build must be interactive to generate Android keystore
    npx eas build --profile development --platform android
-   # OR for iOS:
-   npx eas build --profile development --platform ios
    ```
+   
+   When prompted **"Generate a new Android Keystore?"**, answer **YES**.
    
    ⏱️ **Build time:** 15-30 minutes (cloud build on Expo servers)
    
 3. **Download and install** the `.apk` (Android) or `.ipa` (iOS) file on your device
 
-**Alternative: Use EXPO_TOKEN for CI/CD**
-```bash
-export EXPO_TOKEN=your_token_here
-npx eas build --profile development --platform android --non-interactive
-```
+4. **Subsequent builds (non-interactive):**
+   After the first interactive build generates credentials, you can use:
+   ```bash
+   npx eas build --profile development --platform android --non-interactive
+   ```
+
+**Why First Build Must Be Interactive:**
+- EAS cannot generate Android keystores in `--non-interactive` mode
+- First build creates and stores credentials on Expo servers
+- After initial setup, all future builds can be automated
+
+**EAS Project Info:**
+- **Project ID:** `655608eb-87b6-4fcb-ab8b-779f3dc72b7d`
+- **Project URL:** https://expo.dev/accounts/billionairebay/projects/billionairebay
+- **Account:** billionairebay
 
 ---
 

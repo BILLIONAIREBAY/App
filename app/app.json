@@ -30,7 +30,8 @@
       "package": "com.bbay.luminescence",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -53,7 +54,9 @@
           "android": {
             "kotlinVersion": "1.6.10",
             "packagingOptions": {
-              "pickFirst": ["**/libc++_shared.so"]
+              "pickFirst": [
+                "**/libc++_shared.so"
+              ]
             }
           }
         }
@@ -62,6 +65,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "bbay"
+    "scheme": "bbay",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "655608eb-87b6-4fcb-ab8b-779f3dc72b7d"
+      }
+    },
+    "owner": "billionairebay"
   }
 }
