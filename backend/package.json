@@ -8,15 +8,17 @@
     "build": "tsc"
   },
   "dependencies": {
-    "hono": "^4.0.0",
+    "@supabase/supabase-js": "^2.84.0",
     "@trpc/server": "^11.0.0",
-    "zod": "^3.22.0"
+    "hono": "^4.0.0",
+    "viem": "^2.39.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "wrangler": "^3.78.0",
     "@cloudflare/workers-types": "^4.20240909.0",
+    "dotenv": "^16.4.0",
     "typescript": "^5.3.3",
-    "dotenv": "^16.4.0"
+    "wrangler": "^3.78.0"
   },
   "private": true
 }
