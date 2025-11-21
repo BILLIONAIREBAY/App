@@ -382,6 +382,33 @@ app.get('/aura/check/:serialHash', async (c) => {
   }
 });
 
+app.get('/auction/:id/websocket', async (c) => {
+  try {
+    const auctionId = c.req.param('id');
+    const upgradeHeader = c.req.header('Upgrade');
+
+    if (!upgradeHeader || upgradeHeader !== 'websocket') {
+      return c.json({ error: 'Expected WebSocket upgrade' }, 400);
+    }
+
+    const doId = c.env.AUCTION_ROOM.idFromName(auctionId);
+    const stub = c.env.AUCTION_ROOM.get(doId);
+
+    return stub.fetch(new Request(`https://auction.internal?auctionId=${auctionId}`, {
+      headers: c.req.raw.headers,
+    }));
+  } catch (error) {
+    console.error('[AUCTION/WEBSOCKET] Error:', error);
+    return c.json(
+      {
+        error: 'WEBSOCKET_UPGRADE_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
+  }
+});
+
 export default app;
 
-export { AuctionRoomDO } from './durable-objects/AuctionRoom';
+export { AuctionRoomDO } from './auction/AuctionRoom';

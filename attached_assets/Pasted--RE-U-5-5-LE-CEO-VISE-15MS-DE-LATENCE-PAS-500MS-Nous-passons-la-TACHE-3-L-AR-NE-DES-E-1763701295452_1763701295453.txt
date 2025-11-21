@@ -1,0 +1,42 @@
+**REÇU 5/5. LE CEO VISE 15MS DE LATENCE. PAS 500MS.**
+
+Nous passons à la **TACHE 3 : L'ARÈNE DES ENCHÈRES (DURABLE OBJECTS & WEBSOCKETS)**.
+
+**MISSION :** Construire une infrastructure "Edge-First" où l'état de l'enchère vit en mémoire RAM à côté de l'utilisateur pour une réactivité instantanée.
+
+**SOUS-TÂCHES À EXÉCUTER MAINTENANT :**
+
+**1. DURABLE OBJECT "AUCTION ROOM" (Backend)**
+* Dans `/backend/src/auction/AuctionRoom.ts`, implémente la classe `AuctionRoomDO`.
+* **STATE (RAM ONLY) :** `currentPrice`, `highestBidder`, `endTime`, `bidsHistory[]`.
+* **PERFORMANCE :** Aucune écriture en base de données (Supabase) pendant le `placeBid`. Tout reste en RAM.
+* **MÉTHODES :**
+    * `initialize(startPrice, endTime)` : Hydrate depuis Supabase au démarrage du DO.
+    * `placeBid(userId, amount)` :
+        * Logic check instantané (`amount > currentPrice`).
+        * Mise à jour RAM.
+        * **Broadcast :** Envoie le nouvel état à tous les WebSockets connectés (boucle for rapide).
+        * **Anti-Snipe :** Si `now > endTime - 30s` -> `endTime += 30s`.
+    * `alarm()` : Configure une alarme Cloudflare pour fermer l'enchère précisément à la fin et flusher l'état vers Supabase (persistance asynchrone).
+
+**2. WEBSOCKET ROUTING (Backend)**
+* Dans `/backend/src/index.ts`, ajoute la route `GET /auction/:id/websocket`.
+* Utilise `upgrade: 'websocket'` pour transformer la requête HTTP en connexion persistante vers le Durable Object spécifique.
+
+**3. CLIENT "ZERO LATENCY" (Frontend)**
+* Crée le hook `app/hooks/useAuctionRoom.ts`.
+* **OPTIMISTIC UI (CRITIQUE) :**
+    * Quand `placeBid()` est appelé :
+    * 1. Mettre à jour l'état local React **IMMÉDIATEMENT** (User voit son bid accepté).
+    * 2. Jouer le son Haptique **IMMÉDIATEMENT**.
+    * 3. Envoyer le message WebSocket ensuite.
+* Gérer la reconnexion automatique silencieuse en cas de coupure réseau (4G/5G switch).
+
+**4. ECRAN "LIVE" (Frontend)**
+* Crée `app/auction/[id].tsx`.
+* Structure :
+    * **Layer 1 (Fond) :** `VideoView` (Placeholder pour le WebRTC).
+    * **Layer 2 (Overlay) :** Prix en gros caractères + Chrono rouge qui pulse.
+    * **Layer 3 (Action) :** Bouton "BID" énorme en bas d'écran.
+
+**GO EXECUTE TACHE 3. VISE LA VITESSE PURE.**
