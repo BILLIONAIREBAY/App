@@ -1,34 +1,54 @@
 {
   "cli": {
-    "version": ">= 13.2.0"
+    "version": ">= 3.14.0",
+    "requireCommit": false,
+    "appVersionSource": "local"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
+    "base": {
+      "node": "20.10.0",
       "android": {
-        "gradleCommand": ":app:assembleDebug"
+        "resourceClass": "medium",
+        "image": "default"
       },
       "ios": {
-        "buildConfiguration": "Debug"
+        "resourceClass": "large",
+        "image": "latest"
       }
     },
-    "preview": {
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "ENVIRONMENT": "development",
+        "API_URL": "https://bbay-backend-worker.ceo-dc1.workers.dev"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "staging": {
+      "extends": "base",
+      "distribution": "internal",
+      "env": {
+        "ENVIRONMENT": "staging"
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle"
+      "extends": "base",
+      "env": {
+        "ENVIRONMENT": "production"
       },
       "ios": {
-        "autoIncrement": true
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
