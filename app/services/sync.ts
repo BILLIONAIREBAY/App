@@ -9,7 +9,12 @@ interface SyncPullResponse {
   users: any[];
   items: any[];
   charities: any[];
-  lastSyncTimestamp: number;
+  deleted: {
+    users: string[];
+    items: string[];
+    charities: string[];
+  };
+  lastSyncTimestamp: string;
 }
 
 interface SyncPushPayload {
@@ -45,14 +50,16 @@ export class SyncEngine {
     try {
       console.log('[SyncEngine] PULL: Fetching updates from backend...');
       
-      const response = await fetch(`${BACKEND_URL}/api/sync/pull`, {
-        method: 'POST',
+      const lastPulledAt = this.lastSyncTimestamp ? new Date(this.lastSyncTimestamp).toISOString() : undefined;
+      const url = lastPulledAt 
+        ? `${BACKEND_URL}/sync/pull?lastPulledAt=${encodeURIComponent(lastPulledAt)}`
+        : `${BACKEND_URL}/sync/pull`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          lastSyncTimestamp: this.lastSyncTimestamp,
-        }),
       });
 
       if (!response.ok) {
@@ -61,11 +68,11 @@ export class SyncEngine {
 
       const data: SyncPullResponse = await response.json();
       
-      await database.write(async () => {
-        const usersCollection = database.get<User>('users');
-        const itemsCollection = database.get<Item>('items');
-        const charitiesCollection = database.get<Charity>('charities');
+      const usersCollection = database.get<User>('users');
+      const itemsCollection = database.get<Item>('items');
+      const charitiesCollection = database.get<Charity>('charities');
 
+      await database.write(async () => {
         for (const userData of data.users || []) {
           try {
             const existingUser = await usersCollection.find(userData.id);
@@ -106,6 +113,7 @@ export class SyncEngine {
               item.fxChainTokenId = itemData.fx_chain_token_id;
               item.isStolenFlag = itemData.is_stolen_flag;
               (item as any)._raw.created_at = new Date(itemData.created_at).getTime();
+              (item as any)._raw.updated_at = new Date(itemData.updated_at || itemData.created_at).getTime();
             });
           } catch {
             await itemsCollection.create((item) => {
@@ -120,6 +128,7 @@ export class SyncEngine {
               item.fxChainTokenId = itemData.fx_chain_token_id;
               item.isStolenFlag = itemData.is_stolen_flag;
               (item as any)._raw.created_at = new Date(itemData.created_at).getTime();
+              (item as any)._raw.updated_at = new Date(itemData.updated_at || itemData.created_at).getTime();
             });
           }
         }
@@ -153,9 +162,39 @@ export class SyncEngine {
             });
           }
         }
+
+        if (data.deleted) {
+        for (const userId of data.deleted.users || []) {
+          try {
+            const user = await usersCollection.find(userId);
+            await user.destroyPermanently();
+          } catch {
+            console.log('[SyncEngine] User already deleted:', userId);
+          }
+        }
+
+        for (const itemId of data.deleted.items || []) {
+          try {
+            const item = await itemsCollection.find(itemId);
+            await item.destroyPermanently();
+          } catch {
+            console.log('[SyncEngine] Item already deleted:', itemId);
+          }
+        }
+
+        for (const charityId of data.deleted.charities || []) {
+          try {
+            const charity = await charitiesCollection.find(charityId);
+            await charity.destroyPermanently();
+          } catch {
+            console.log('[SyncEngine] Charity already deleted:', charityId);
+          }
+        }
+        }
       });
 
-      this.lastSyncTimestamp = data.lastSyncTimestamp;
+      const timestamp = data.lastSyncTimestamp ? new Date(data.lastSyncTimestamp).getTime() : Date.now();
+      this.lastSyncTimestamp = isNaN(timestamp) ? Date.now() : timestamp;
       console.log('[SyncEngine] PULL: Sync completed successfully');
     } catch (error) {
       console.error('[SyncEngine] PULL failed:', error);
@@ -169,7 +208,7 @@ export class SyncEngine {
     try {
       console.log('[SyncEngine] PUSH: Sending local changes to backend...');
       
-      const response = await fetch(`${BACKEND_URL}/api/sync/push`, {
+      const response = await fetch(`${BACKEND_URL}/sync/push`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

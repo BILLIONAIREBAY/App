@@ -28,6 +28,7 @@ export const schema = appSchema({
         { name: 'fx_chain_token_id', type: 'string', isOptional: true },
         { name: 'is_stolen_flag', type: 'boolean' },
         { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
       ]
     }),
     tableSchema({
