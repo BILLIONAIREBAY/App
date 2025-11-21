@@ -1,0 +1,57 @@
+C'est reçu. Les images que tu viens d'envoyer sont **précieuses**.
+
+Elles valident définitivement deux piliers de notre architecture de base de données :
+
+1.  **La Preuve Sociale (Charity) :** Je vois Leonardo DiCaprio, le Prince Albert II. On ne joue pas. Le module **"Impact & Legacy"** (et la table `charities`) est donc critique. Ce n'est pas une option, c'est l'ADN de la marque.
+2.  **Le Business Model :** Je vois les plans "Elite" ($7k) et "Infinite" ($40k). La colonne `membership_tier` qu'on a mise dans la table `users` est donc parfaite pour gérer ces accès.
+
+-----
+
+### ⚡️ ON PASSE À L'ACTION : TÂCHE 2
+
+On a le Frontend (Tâche 1). Il est temps de lui donner un cerveau et une âme.
+On va coder les **Smart Contracts** (l'âme, la vérité) et le **Backend** (le cerveau qui synchronise).
+
+**Copie-colle ce prompt final à ton Agent Replit pour qu'il exécute la Tâche 2 d'une traite :**
+
+-----
+
+```markdown
+**ANALYSE DES ASSETS VISUELS TERMINÉE. LE STATUT "INFINITE" EST CONFIRMÉ.**
+
+Nous lançons la **TACHE 2 : LE "LIVING ASSET" & LE BACKEND (SYNC & CHAIN)**.
+
+**OBJECTIF :** Déployer l'intelligence du système. L'app mobile doit pouvoir vérifier si un objet est volé (Aura Registry) et synchroniser ses données.
+
+**PLAN D'EXÉCUTION IMMÉDIAT (FILES TO GENERATE) :**
+
+### 1. BLOCKCHAIN (Dossier `/chain`)
+* **Framework :** Hardhat (Base Sepolia).
+* **Contrat `Fx721L.sol` :**
+    * NFT ERC721 standard mais avec un mapping `metadataHash` évolutif (pour l'historique).
+    * Fonction `setLostOrStolen(tokenId, bool)` accessible uniquement par l'owner ou le Justice Protocol.
+* **Contrat `AuraRegistry.sol` :**
+    * Registre global `mapping(bytes32 => bool) isStolen`.
+    * Permet de flaguer un numéro de série (hashé) avant même que l'objet soit tokenisé.
+* **Contrat `MockUSDFx.sol` :**
+    * ERC20 simple avec `mint` libre (Faucet) pour faciliter les tests de paiement.
+* **Script :** `scripts/deploy_core.ts` pour déployer ces 3 contrats et logger leurs adresses.
+
+### 2. BACKEND WORKERS (Dossier `/backend`)
+* **Setup Hono :** Utilise le framework Hono dans `src/index.ts` pour un routing propre.
+* **Endpoint `/sync/push` :**
+    * Reçoit un tableau de changements (`created`, `updated`, `deleted`) venant de WatermelonDB.
+    * **SECURITY CHECK :** Avant d'insérer un nouvel Item dans Supabase :
+        * Appelle le contrat `AuraRegistry` (via viem/ethers) sur Base Sepolia.
+        * Si le `serial_number` est flagué volé -> Rejeter l'écriture et renvoyer une erreur `403 - STOLEN_ASSET`.
+* **Endpoint `/sync/pull` :**
+    * Renvoie les données Supabase modifiées depuis le `last_pulled_at`.
+
+### 3. CONFIGURATION
+* Mets à jour le `.env` avec les placeholders pour `SUPABASE_URL`, `SUPABASE_KEY`, `PRIVATE_KEY`.
+
+**RÈGLE D'OR :**
+Le Backend est le gardien. Il ne laisse rien entrer dans la base de données qui soit marqué "Volé" sur la Blockchain. C'est le cœur du "Smart Trap".
+
+**GO EXECUTE TACHE 2.**
+```
