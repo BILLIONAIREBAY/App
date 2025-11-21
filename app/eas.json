@@ -8,12 +8,11 @@
     "base": {
       "node": "20.10.0",
       "android": {
-        "resourceClass": "medium",
-        "image": "default"
+        "image": "ubuntu-22.04-jdk-17-ndk-r26c"
       },
       "ios": {
-        "resourceClass": "large",
-        "image": "latest"
+        "image": "latest",
+        "resourceClass": "large"
       }
     },
     "development": {
