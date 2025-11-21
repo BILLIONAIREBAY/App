@@ -46,6 +46,27 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **app_config**: Gatekeeper version control and maintenance mode
 
 ## Recent Changes
+- 2025-11-21: **TACHE 5 COMPLETED** - DEPLOY & POLISH (LA MISE EN ORBITE)
+  - **Tab Navigation with Sensory Feedback:**
+    * Created app/app/(tabs)/_layout.tsx with 5 tabs: Home, Auctions, Whisper, Impact, Profile
+    * Integrated expo-av for audio feedback on tab change (tab_click.mp3)
+    * Integrated expo-haptics with Light impact feedback (screenListeners.tabPress)
+    * Each tab has dedicated route with correct import paths (../../db, ../../services)
+    * Modified root _layout.tsx to use (tabs) as base with modal overlay for auctions
+  - **Cloudflare Workers Production Deployment:**
+    * Fixed wrangler.toml to use new_sqlite_classes migration (free plan requirement)
+    * Successfully deployed to: https://bbay-backend-worker.ceo-dc1.workers.dev
+    * Durable Objects (AuctionRoomDO) functional with in-RAM auction state
+    * All endpoints live: /health, /sync/push, /sync/pull, /aura/check/:serialHash, /whisper/request, /auction/:id/websocket
+    * R2 bucket (Shadow Vault) deferred for future provisioning
+  - **Documentation:**
+    * Created README_FINAL.md with complete deployment guide
+    * Production API endpoint documented
+    * Mobile app launch instructions (Expo Go + custom builds)
+    * EAS Build production procedure
+    * Blockchain deployment steps
+    * Architecture highlights with LUMINESCENCE V3 principles
+    * Next steps roadmap
 - 2025-11-21: **TACHE 4 COMPLETED** - LE GÉNIE & L'HÉRITAGE (AI Search + Charity Impact)
   - **Smart Contracts:**
     * FxCharitySplitter.sol: Atomic payment splitting between seller and charity using transfer() calls
