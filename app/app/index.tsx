@@ -109,7 +109,7 @@ function HomeScreen({ items }: { items: Item[] }) {
           uri: 'https://assets.mixkit.co/videos/preview/mixkit-black-and-white-city-traffic-1217-large.mp4',
         }}
         style={StyleSheet.absoluteFill}
-        resizeMode={ResizeMode.Cover}
+        resizeMode={ResizeMode.COVER}
         isLooping
         shouldPlay
         isMuted={true}
