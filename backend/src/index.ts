@@ -456,29 +456,72 @@ app.get('/auction/:id/websocket', async (c) => {
 
 app.post('/whisper/request', async (c) => {
   try {
+    const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = c.env;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return c.json({ error: 'Supabase configuration missing' }, 500);
+    }
+
     const body = await c.req.json();
-    const { text_query, user_id } = body;
+    const { id, text_query, user_id } = body;
+
+    if (!id || typeof id !== 'string') {
+      return c.json({ error: 'Missing or invalid id' }, 400);
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return c.json({ error: 'Invalid UUID format for id' }, 400);
+    }
 
     if (!text_query || typeof text_query !== 'string') {
       return c.json({ error: 'Missing or invalid text_query' }, 400);
     }
 
-    console.log('[WHISPER] Processing query:', text_query);
+    if (!user_id || typeof user_id !== 'string') {
+      return c.json({ error: 'Missing or invalid user_id' }, 400);
+    }
+
+    console.log('[WHISPER] Processing query:', { id, text_query, user_id });
 
     const aiAnalysis = {
       tags: extractTags(text_query),
       category: inferCategory(text_query),
       confidence: 0.85,
-      status: 'completed',
     };
 
     console.log('[WHISPER] AI analysis:', aiAnalysis);
 
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const now = new Date().toISOString();
+
+    const { error } = await supabase
+      .from('whisper_requests')
+      .upsert({
+        id,
+        user_id,
+        text_query,
+        ai_analysis_json: JSON.stringify(aiAnalysis),
+        status: 'completed',
+        updated_at: now,
+      }, {
+        onConflict: 'id'
+      });
+
+    if (error) {
+      console.error('[WHISPER] Failed to upsert whisper request:', error);
+      return c.json({ error: 'Failed to save AI analysis', details: error.message }, 500);
+    }
+
+    console.log('[WHISPER] ✓ Analysis upserted to Supabase with updated_at:', now);
+
     return c.json({
+      id,
       text_query,
       ai_analysis: aiAnalysis,
       status: 'completed',
-      timestamp: new Date().toISOString(),
+      timestamp: now,
     });
   } catch (error) {
     console.error('[WHISPER] Error:', error);

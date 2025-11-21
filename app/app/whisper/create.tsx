@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { database } from '../../db';
+import WhisperRequest from '../../db/models/WhisperRequest';
 
 interface AIResponse {
   tags: string[];
@@ -34,7 +36,25 @@ export default function WhisperCreate() {
     setResponse(null);
 
     try {
-      console.log('[WHISPER] Sending query:', query);
+      console.log('[WHISPER] Creating local whisper request...');
+
+      let whisperRequest: WhisperRequest | null = null;
+
+      await database.write(async () => {
+        const whisperRequestsCollection = database.get<WhisperRequest>('whisper_requests');
+        whisperRequest = await whisperRequestsCollection.create((wr) => {
+          wr.userId = 'demo-user-id';
+          wr.textQuery = query.trim();
+          wr.aiAnalysisJson = '';
+          wr.status = 'pending';
+        });
+      });
+
+      if (!whisperRequest) {
+        throw new Error('Failed to create whisper request');
+      }
+
+      console.log('[WHISPER] Sending query to backend:', whisperRequest.id);
 
       const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
       if (!backendUrl) {
@@ -47,8 +67,9 @@ export default function WhisperCreate() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text_query: query,
-          user_id: 'demo-user-id',
+          id: whisperRequest.id,
+          text_query: whisperRequest.textQuery,
+          user_id: whisperRequest.userId,
         }),
       });
 
@@ -58,6 +79,13 @@ export default function WhisperCreate() {
 
       const data = await res.json();
       console.log('[WHISPER] Response:', data);
+
+      await database.write(async () => {
+        await whisperRequest!.update((wr) => {
+          wr.aiAnalysisJson = JSON.stringify(data.ai_analysis);
+          wr.status = 'completed';
+        });
+      });
 
       setResponse(data.ai_analysis || data);
     } catch (err) {

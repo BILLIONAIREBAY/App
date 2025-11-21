@@ -28,3 +28,6 @@ args = "cd app && npx expo start --tunnel --clear"
 [[ports]]
 localPort = 8081
 externalPort = 80
+
+[nix]
+channel = "stable-25_05"

@@ -16,8 +16,11 @@
     "app:dev": "cd app && npm run start"
   },
   "devDependencies": {
+    "prettier": "^3.2.5",
     "turbo": "latest",
-    "typescript": "^5.3.3",
-    "prettier": "^3.2.5"
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "expo-crypto": "^15.0.7"
   }
 }
