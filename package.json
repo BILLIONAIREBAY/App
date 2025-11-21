@@ -21,6 +21,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "expo-av": "^16.0.7",
     "expo-crypto": "^15.0.7"
   }
 }
