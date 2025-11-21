@@ -110,7 +110,11 @@ export function useAuctionRoom(auctionId: string): UseAuctionRoomResult {
   }, [auctionState.endTime]);
 
   const placeBid = useCallback(async (userId: string, amount: number) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } catch (error) {
+      console.log('[AuctionRoom] Haptics not available');
+    }
 
     setAuctionState((prev) => ({
       ...prev,

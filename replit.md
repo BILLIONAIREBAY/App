@@ -40,6 +40,19 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **charity_auctions**: Split payment tracking for impact auctions
 
 ## Recent Changes
+- 2025-11-21: **TACHE 3 COMPLETED** - L'ARÈNE DES ENCHÈRES (Durable Objects & WebSockets)
+  - Created AuctionRoomDO Durable Object for edge-first auction state management
+  - WebSocket route GET /auction/:id/websocket with automatic reconnection
+  - useAuctionRoom hook with optimistic UI and sub-100ms latency target
+  - Live auction screen with real-time price updates and haptic feedback
+  - Anti-snipe protection: +30s extension when bid in last 30 seconds
+  - State persistence via alarm() at auction end
+  - Database migrations: app_config (Gatekeeper) and auctions tables
+- 2025-11-21: **SECURITY & PRIVACY ADDITIONS**
+  - Gatekeeper system: Force update modal with version comparison
+  - Privacy Shield: expo-screen-capture integration for anti-screenshot protection
+  - App state listener for background blur protection (multitasking privacy)
+  - Admin-controlled maintenance mode via app_config table
 - 2025-11-21: **TACHE 2 COMPLETED** - AuraRegistry Blockchain + Backend Sync API with SMART TRAP
   - Created AuraRegistry.sol smart contract for global stolen item tracking
   - Implemented deploy_core.ts script (deploys MockUSDFx, MockJusticeProtocol, Fx721L, AuraRegistry)

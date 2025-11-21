@@ -17,7 +17,3 @@ VALUES (1, '1.0.0', '1.0.0', false);
 ALTER TABLE public.app_config ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read app_config" ON public.app_config
     FOR SELECT USING (true);
-
--- Admin-only updates (restrict to service role)
-CREATE POLICY "Admin update app_config" ON public.app_config
-    FOR UPDATE USING (false);

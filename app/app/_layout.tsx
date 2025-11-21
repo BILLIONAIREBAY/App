@@ -1,17 +1,20 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import * as Application from 'expo-application';
 import { createClient } from '@supabase/supabase-js';
 import { usePrivacyShield } from '../hooks/usePrivacyShield';
+import { PrivacyShieldOverlay } from '../components/PrivacyShieldOverlay';
 import { GatekeeperModal } from '../components/GatekeeperModal';
 import '../global.css';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 function compareVersions(current: string, required: string): boolean {
   const currentParts = current.split('.').map(Number);
@@ -29,7 +32,7 @@ function compareVersions(current: string, required: string): boolean {
 }
 
 export default function RootLayout() {
-  usePrivacyShield();
+  const showPrivacyBlur = usePrivacyShield();
 
   const [gatekeeperState, setGatekeeperState] = useState<{
     type: 'update' | 'maintenance' | null;
@@ -41,6 +44,11 @@ export default function RootLayout() {
   }, []);
 
   const checkAppConfig = async () => {
+    if (!supabase) {
+      console.warn('[Gatekeeper] Supabase not configured, skipping check');
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('app_config')
@@ -76,44 +84,49 @@ export default function RootLayout() {
     }
   };
 
+  const isGated = gatekeeperState.type !== null;
+
   return (
     <>
       <StatusBar style="light" />
       <GatekeeperModal
-        visible={gatekeeperState.type !== null}
+        visible={isGated}
         type={gatekeeperState.type || 'update'}
         message={gatekeeperState.message}
       />
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#0A0A0A',
-          },
-          headerTintColor: '#D4AF37',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          contentStyle: {
-            backgroundColor: '#0A0A0A',
-          },
-        }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: 'BillionaireBay',
-            headerShown: true,
+      {!isGated && (
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#0A0A0A',
+            },
+            headerTintColor: '#D4AF37',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            contentStyle: {
+              backgroundColor: '#0A0A0A',
+            },
           }}
-        />
-        <Stack.Screen
-          name="auction/[id]"
-          options={{
-            title: 'Live Auction',
-            headerShown: false,
-            presentation: 'fullScreenModal',
-          }}
-        />
-      </Stack>
+        >
+          <Stack.Screen
+            name="index"
+            options={{
+              title: 'BillionaireBay',
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen
+            name="auction/[id]"
+            options={{
+              title: 'Live Auction',
+              headerShown: false,
+              presentation: 'fullScreenModal',
+            }}
+          />
+        </Stack>
+      )}
+      <PrivacyShieldOverlay visible={showPrivacyBlur} />
     </>
   );
 }
