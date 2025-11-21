@@ -394,7 +394,7 @@ app.get('/auction/:id/websocket', async (c) => {
     const doId = c.env.AUCTION_ROOM.idFromName(auctionId);
     const stub = c.env.AUCTION_ROOM.get(doId);
 
-    return stub.fetch(new Request(`https://auction.internal/${auctionId}`, {
+    return stub.fetch(new Request(`https://auction.internal/auction/${auctionId}`, {
       headers: c.req.raw.headers,
     }));
   } catch (error) {

@@ -41,18 +41,35 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 
 ## Recent Changes
 - 2025-11-21: **TACHE 3 COMPLETED** - L'ARÈNE DES ENCHÈRES (Durable Objects & WebSockets)
-  - Created AuctionRoomDO Durable Object for edge-first auction state management
-  - WebSocket route GET /auction/:id/websocket with automatic reconnection
-  - useAuctionRoom hook with optimistic UI and sub-100ms latency target
-  - Live auction screen with real-time price updates and haptic feedback
-  - Anti-snipe protection: +30s extension when bid in last 30 seconds
-  - State persistence via alarm() at auction end
-  - Database migrations: app_config (Gatekeeper) and auctions tables
+  - **Backend (Cloudflare Workers + Durable Objects):**
+    * AuctionRoomDO class: In-RAM auction state (currentPrice, highestBidder, endTime, bidsHistory)
+    * WebSocket route GET /auction/:id/websocket with path-based routing (`/auction/${id}`)
+    * Anti-snipe logic: +30s extension when bid arrives in final 30 seconds
+    * Persistence via alarm() at auction end + every 10s backup recommended
+    * Robust path parsing: `split('/').filter(Boolean)` handles trailing slashes
+    * Durable Object binding: AUCTION_ROOM configured in wrangler.toml
+  - **Frontend (React Native + Expo):**
+    * useAuctionRoom hook: WebSocket connection with automatic reconnection
+    * Optimistic UI: local state update before server confirmation
+    * Haptic feedback on bid placement (expo-haptics)
+    * Countdown timer with 100ms refresh for sub-100ms perceived latency
+    * Live auction screen (/auction/[id].tsx): video placeholder + overlay UI
+  - **Database migrations:**
+    * 20240121000000_add_app_config.sql: Gatekeeper version control table
+    * 20240121000001_add_auctions.sql: Auctions and bids tracking tables
 - 2025-11-21: **SECURITY & PRIVACY ADDITIONS**
-  - Gatekeeper system: Force update modal with version comparison
-  - Privacy Shield: expo-screen-capture integration for anti-screenshot protection
-  - App state listener for background blur protection (multitasking privacy)
-  - Admin-controlled maintenance mode via app_config table
+  - **Gatekeeper System (Force Update):**
+    * app_config table with min_supported_version_ios/android + maintenance_mode
+    * Version comparison logic with semantic versioning (compareVersions)
+    * Non-dismissible modal blocking navigation when update/maintenance required
+    * Conditional rendering: Stack only renders when !isGated
+    * Error-safe: clears gate state on Supabase fetch errors (no spurious lockouts)
+  - **Privacy Shield (Anti-Screenshot + Multitasking):**
+    * expo-screen-capture: usePreventScreenCapture() blocks screenshots/recording
+    * AppState listener: detects background/inactive states
+    * BlurView overlay: renders full-screen dark blur when app backgrounds
+    * PrivacyShieldOverlay component: proper StyleSheet.create() for cross-platform
+    * Prevents sensitive auction data exposure during multitasking/screenshots
 - 2025-11-21: **TACHE 2 COMPLETED** - AuraRegistry Blockchain + Backend Sync API with SMART TRAP
   - Created AuraRegistry.sol smart contract for global stolen item tracking
   - Implemented deploy_core.ts script (deploys MockUSDFx, MockJusticeProtocol, Fx721L, AuraRegistry)

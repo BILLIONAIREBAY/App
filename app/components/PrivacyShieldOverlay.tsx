@@ -11,9 +11,15 @@ export function PrivacyShieldOverlay({ visible }: PrivacyShieldOverlayProps) {
     return null;
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      ...StyleSheet.absoluteFillObject,
+    },
+  });
+
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-      <BlurView intensity={100} style={StyleSheet.absoluteFillObject} tint="dark" />
+    <View style={styles.container} pointerEvents="none">
+      <BlurView intensity={100} style={styles.container} tint="dark" />
     </View>
   );
 }

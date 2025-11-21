@@ -152,7 +152,8 @@ export class AuctionRoomDO extends DurableObject<Env> {
 
   async fetch(request: Request) {
     const url = new URL(request.url);
-    const auctionId = url.searchParams.get('auctionId') || url.pathname.split('/').pop();
+    const segments = url.pathname.split('/').filter(Boolean);
+    const auctionId = url.searchParams.get('auctionId') || segments[segments.length - 1];
 
     if (!auctionId) {
       return new Response('Missing auctionId', { status: 400 });

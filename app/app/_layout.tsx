@@ -58,6 +58,7 @@ export default function RootLayout() {
 
       if (error || !data) {
         console.error('[Gatekeeper] Failed to fetch app config:', error);
+        setGatekeeperState({ type: null });
         return;
       }
 
@@ -78,9 +79,12 @@ export default function RootLayout() {
 
       if (needsUpdate) {
         setGatekeeperState({ type: 'update' });
+      } else {
+        setGatekeeperState({ type: null });
       }
     } catch (error) {
       console.error('[Gatekeeper] Error:', error);
+      setGatekeeperState({ type: null });
     }
   };
 
