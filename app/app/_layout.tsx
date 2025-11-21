@@ -114,10 +114,9 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen
-            name="index"
+            name="(tabs)"
             options={{
-              title: 'BillionaireBay',
-              headerShown: true,
+              headerShown: false,
             }}
           />
           <Stack.Screen
