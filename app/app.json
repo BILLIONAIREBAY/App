@@ -47,7 +47,6 @@
           "cameraPermission": "Allow BillionaireBay to access your camera for item authentication."
         }
       ],
-      "@morrowdigital/watermelondb-expo-plugin",
       [
         "expo-build-properties",
         {
