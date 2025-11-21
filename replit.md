@@ -40,6 +40,20 @@ Phygital Sovereignty Marketplace - A luxury marketplace combining physical and d
 - **charity_auctions**: Split payment tracking for impact auctions
 
 ## Recent Changes
+- 2025-11-21: **TACHE 2 COMPLETED** - AuraRegistry Blockchain + Backend Sync API with SMART TRAP
+  - Created AuraRegistry.sol smart contract for global stolen item tracking
+  - Implemented deploy_core.ts script (deploys MockUSDFx, MockJusticeProtocol, Fx721L, AuraRegistry)
+  - Built Hono backend on Cloudflare Workers with 3 endpoints:
+    * POST /sync/push: SMART TRAP checks AuraRegistry before accepting items, strips created_at/updated_at to respect triggers
+    * GET /sync/pull: Delta sync with watermark from max(updated_at, deleted_at) of returned rows, falls back to lastPulledAt or epoch zero
+    * GET /aura/check/:serialHash: Manual verification endpoint
+  - Database migrations:
+    * 20240120000000_add_items_updated_at.sql: Added updated_at column with trigger, index, and backfill
+    * 20240120000001_add_deletions_tracking.sql: Created deletions table with automatic triggers on users/items/charities
+  - Frontend SyncEngine handles creates/updates/deletions with destroyPermanently() to prevent tombstone accumulation
+  - Watermark computation prevents race conditions by using timestamps of returned data only
+  - Backend strips created_at/updated_at from all payloads to let database triggers control timestamps
+  - Complete documentation in backend/README.md and .env.example
 - 2025-11-20: **TACHE 1 COMPLETED** - Local-First Architecture & Biometric Authentication
   - WatermelonDB configured with JSI for high-performance SQLite
   - Schema mirrors Supabase (users, items, charities)
