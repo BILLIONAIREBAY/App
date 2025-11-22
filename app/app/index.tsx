@@ -16,7 +16,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from 'react';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { database } from '../db';
+import { getDatabase } from '../db';
 import Item from '../db/models/Item';
 import { syncEngine } from '../services/sync';
 import { Q } from '@nozbe/watermelondb';
