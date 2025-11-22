@@ -1,0 +1,24 @@
+Un écran blanc avec une erreur de chargement du bundle (UnableToResolveError) sur expo-router/entry signifie que le serveur Metro (le bundler JavaScript) n'arrive pas à trouver le point d'entrée de l'application.
+
+Cela arrive souvent après un changement de configuration (main dans package.json) si le cache n'est pas correctement vidé ou si le chemin est incorrect.
+
+Diagnostic et Actions
+Vérification du chemin du point d'entrée :
+
+Assure-toi que dans app/package.json, la propriété "main" pointe bien vers "expo-router/entry".
+
+Vérifie que tu as bien installé expo-router : npm list expo-router. Si ce n'est pas le cas (ou si c'est une vieille version), installe-le : npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar.
+
+Nettoyage profond du cache (Côté Serveur & Client) :
+
+Serveur (Replit) : Arrête le serveur (Ctrl+C). Lance npx expo start --clear --tunnel. L'option --clear est cruciale ici.
+
+Client (Téléphone) : Secoue ton téléphone (ou utilise le menu développeur) et sélectionne "Reload". Si cela ne suffit pas, force la fermeture de l'application et relance-la.
+
+Vérification de la structure des fichiers :
+
+Assure-toi que ton fichier _layout.tsx (ou .js) se trouve bien dans app/app/_layout.tsx (ou app/_layout.tsx selon ta configuration app.json). Avec Expo Router, la structure des dossiers définit la navigation.
+
+Si tu as un dossier app/app, le fichier app.json doit pointer vers ce dossier via la propriété scheme ou slug mais surtout, Expo Router scanne le dossier app (ou src/app) par défaut. Vérifie que tes fichiers de routes (index.tsx, _layout.tsx) sont bien dans un dossier que Expo Router surveille. Habituellement, c'est le dossier racine du projet ou un dossier app/.
+
+Action immédiate : Tente le nettoyage profond du cache serveur (npx expo start --clear --tunnel) et recharge l'application sur ton téléphone. Si l'écran blanc persiste, vérifie la structure de tes fichiers par rapport à ce que Expo Router attend.
