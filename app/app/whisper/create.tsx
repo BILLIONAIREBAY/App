@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { database } from '../../db';
+import { getDatabase } from '../../db';
 import WhisperRequest from '../../db/models/WhisperRequest';
 
 interface AIResponse {
@@ -38,6 +38,7 @@ export default function WhisperCreate() {
     try {
       console.log('[WHISPER] Creating local whisper request...');
 
+      const database = getDatabase();
       let whisperRequest: WhisperRequest | null = null;
 
       await database.write(async () => {

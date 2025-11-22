@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
 import { withObservables } from '@nozbe/watermelondb/react';
-import { database } from '../../db';
+import { getDatabase } from '../../db';
 import Charity from '../../db/models/Charity';
 
 interface CharityListProps {
@@ -86,12 +86,15 @@ function ImpactTab({ charities }: CharityListProps) {
   );
 }
 
-const enhance = withObservables([], () => ({
-  charities: database.collections
-    .get<Charity>('charities')
-    .query()
-    .observe(),
-}));
+const enhance = withObservables([], () => {
+  const database = getDatabase();
+  return {
+    charities: database.collections
+      .get<Charity>('charities')
+      .query()
+      .observe(),
+  };
+});
 
 export default enhance(ImpactTab);
 

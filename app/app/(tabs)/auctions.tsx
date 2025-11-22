@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { database } from '../../db';
+import { getDatabase } from '../../db';
 
 export default function AuctionsScreen() {
   const goToLiveAuction = () => {

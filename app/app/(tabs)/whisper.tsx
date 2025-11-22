@@ -10,7 +10,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { database } from '../../db';
+import { getDatabase } from '../../db';
 import WhisperRequest from '../../db/models/WhisperRequest';
 
 interface AIResponse {
@@ -36,6 +36,7 @@ export default function WhisperTab() {
     try {
       console.log('[WHISPER] Creating local whisper request...');
 
+      const database = getDatabase();
       let whisperRequest: WhisperRequest | null = null;
 
       await database.write(async () => {
