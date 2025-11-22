@@ -43,12 +43,13 @@ export default function WhisperCreate() {
 
       await database.write(async () => {
         const whisperRequestsCollection = database.get<WhisperRequest>('whisper_requests');
-        whisperRequest = await whisperRequestsCollection.create((wr) => {
+        const newRequest = await whisperRequestsCollection.create((wr) => {
           wr.userId = 'demo-user-id';
           wr.textQuery = query.trim();
           wr.aiAnalysisJson = '';
           wr.status = 'pending';
         });
+        whisperRequest = newRequest;
       });
 
       if (!whisperRequest) {

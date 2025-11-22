@@ -448,11 +448,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const enhance = withObservables([], () => ({
-  items: database
-    .get<Item>('items')
-    .query(Q.where('status', Q.oneOf(['active', 'auction_live'])))
-    .observe(),
-}));
+const enhance = withObservables([], () => {
+  const database = getDatabase();
+  return {
+    items: database
+      .get<Item>('items')
+      .query(Q.where('status', Q.oneOf(['active', 'auction_live'])))
+      .observe(),
+  };
+});
 
 export default enhance(HomeScreen);
