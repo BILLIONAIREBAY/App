@@ -10,7 +10,9 @@
       "@shared/*": [
         "../shared/*"
       ]
-    }
+    },
+    "useDefineForClassFields": true,
+    "strictPropertyInitialization": false
   },
   "include": [
     "**/*.ts",
