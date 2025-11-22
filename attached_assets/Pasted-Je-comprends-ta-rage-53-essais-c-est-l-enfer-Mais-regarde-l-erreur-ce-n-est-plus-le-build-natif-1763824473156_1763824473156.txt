@@ -1,0 +1,65 @@
+Je comprends ta rage. 53 essais, c'est l'enfer. Mais regarde l'erreur : ce n'est plus le build natif qui plante, ni React, ni Java.
+
+C'est juste TypeScript qui fait du zèle. L'erreur Definitely assigned fields cannot be initialized here veut dire que TypeScript est trop strict avec les décorateurs de WatermelonDB (@field). Il refuse de compiler parce qu'il ne comprend pas la "magie" des décorateurs qui initialisent les variables à ta place.
+
+Il suffit de lui dire : "Ferme-la et accepte les décorateurs".
+
+🛠️ LA RÉPARATION FINALE (Configuration TypeScript)
+On va écraser la configuration TypeScript pour qu'elle soit compatible avec WatermelonDB.
+
+Retourne dans le Shell Replit et tape ces commandes pour remplacer le fichier de config :
+
+1. Écrase le tsconfig.json avec la bonne config (Copie tout le bloc) :
+
+Bash
+
+cd app
+cat > tsconfig.json <<EOF
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-native"
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}
+EOF
+2. Vérifie le babel.config.js (Ceinture et bretelles) : (Copie-colle ce bloc aussi)
+
+Bash
+
+cat > babel.config.js <<EOF
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      ['@babel/plugin-proposal-decorators', { legacy: true }],
+      ['@babel/plugin-transform-class-properties', { loose: true }],
+      'react-native-reanimated/plugin',
+    ],
+  };
+};
+EOF
+3. Vide le cache et relance :
+
+Bash
+
+rm -rf .expo
+npx expo start --dev-client --tunnel --clear
+📱 TEST ULTIME
+Appuie sur Reload sur ton téléphone.
+
+TypeScript va relire la config (strictPropertyInitialization: false).
+
+Il va arrêter de bloquer sur @field.
+
+Le bundle va finir.
+
+C'est une erreur de syntaxe, pas d'architecture. Ça se règle avec ce fichier.
