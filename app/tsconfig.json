@@ -3,22 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "experimentalDecorators": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@shared/*": [
-        "../shared/*"
-      ]
-    },
+    "emitDecoratorMetadata": true,
     "useDefineForClassFields": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-native"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "nativewind-env.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
